@@ -1,2 +1,2 @@
 # autocross
-Autocross worker assignment tool
+Autocross work assignment tool

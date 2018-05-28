@@ -1,0 +1,11 @@
+**/bin/
+**/.git/
+**/.settings/
+**/gradle/
+**/.gradle/
+**/build/
+.project
+.classpath
+gradlew
+gradlew.bat
+workerAssignmentSample.xslx
