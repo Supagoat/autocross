@@ -19,7 +19,10 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     // The production code uses the SLF4J logging API at compile time
-    compile 'org.slf4j:slf4j-api:1.7.7'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
+	compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    
     // https://mvnrepository.com/artifact/org.apache.poi/poi
 	compile group: 'org.apache.poi', name: 'poi', version: '3.17'
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
@@ -31,12 +34,22 @@ dependencies {
     // https://mvnrepository.com/artifact/org.flywaydb/flyway-core
 	compile group: 'org.flywaydb', name: 'flyway-core', version: '5.0.7'
     
+	// https://mvnrepository.com/artifact/commons-codec/commons-codec
+	compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
+	// https://mvnrepository.com/artifact/org.mybatis/mybatis
+	compile group: 'org.mybatis', name: 'mybatis', version: '3.4.6'
+
+	// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+	compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
 
     // https://mvnrepository.com/artifact/com.sparkjava/spark-core
 	compile group: 'com.sparkjava', name: 'spark-core', version: '2.7.1'
 	testCompile 'junit:junit:4.11'
     
 }
+task copySecrets(type: Copy) {
+
+  }
 task copyLibs(type: Copy) {
     into "$buildDir/libs"
     from configurations.runtime

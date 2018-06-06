@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.util.List;
 import java.util.Properties;
 
+import q.autocross.engine.Person;
+
 public class DB {
 	private Connection connection;
 	
@@ -32,8 +34,8 @@ public class DB {
 		new DB();
 	}
 	
-	public List<Person> getPeopleByNumber(String clubId, String number) {
+	/*public List<Person> getPeopleByNumber(String clubId, String number) {
 		
 	}
-	
+	*/
 }
