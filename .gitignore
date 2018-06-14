@@ -11,3 +11,4 @@ gradlew.bat
 workerAssignmentSample.xslx
 src/main/resources/db/db.properties
 db.properties
+dbConfig.xml

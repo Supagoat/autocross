@@ -1,41 +1,42 @@
 package q.autocross.db;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.List;
-import java.util.Properties;
+
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import q.autocross.engine.Person;
 
 public class DB {
-	private Connection connection;
+	private AutocrossMapper mapper;
 	
 	public DB() {
 		connect();
 	}
 	
-	protected void connect() {
+	protected DB connect() {
 		try {
-		String url = "jdbc:postgresql://bullet/autocross";
-		Properties props = new Properties();
-		props.setProperty("user","autocross");
-		props.setProperty("password","autocross");
-		props.setProperty("ssl","false");
-		connection = DriverManager.getConnection(url, props);
+
+			String resource = "d:\\dev\\autocross\\dbConfig.xml";
+			Reader reader = new FileReader(new File(resource));
+			SqlSessionFactory  sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			mapper = sqlSessionFactory.openSession().getMapper(AutocrossMapper.class);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		//String url = "jdbc:postgresql://localhost/test?user=fred&password=secret&ssl=true";
-		//Connection conn = DriverManager.getConnection(url);
 
+		return this;
 	}
 	
 	public static void main(String[] args) {
-		new DB();
+		System.out.println("PERSON: "+new DB().connect().getPeopleById("person_id").getFirstName());
 	}
 	
-	/*public List<Person> getPeopleByNumber(String clubId, String number) {
-		
+	public Person getPeopleById(String id) {
+		return mapper.getPerson(id);
 	}
-	*/
+	
 }

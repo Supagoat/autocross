@@ -1,7 +1,8 @@
 package q.autocross.engine;
 
 public class Person {
-	
+	private String clubId;
+	private String personId;
 	private String firstName;
 	private String lastName;
 	private String primaryNumber;
@@ -31,7 +32,20 @@ public class Person {
 	public void setEmailHash(String emailHash) {
 		this.emailHash = emailHash;
 	}
-	
+	public String getClubId() {
+		return clubId;
+	}
+	public Person setClubId(String clubId) {
+		this.clubId = clubId;
+		return this;
+	}
+	public String getPersonId() {
+		return personId;
+	}
+	public Person setPersonId(String personId) {
+		this.personId = personId;
+		return this;
+	}
 	
 	
 }
