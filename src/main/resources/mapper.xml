@@ -17,4 +17,22 @@
   <select id="selectPerson" resultMap="personMap">
     select * from Person where person_id = #{id}
   </select>
+  
+  <select id="selectPersonByName" resultMap="personMap">
+    select * from Person where first_name= #{firstName}
+    and last_name=#{lastName}
+  </select>
+  
+  <select id="selectPersonByEmail" resultMap="personMap">
+    select * from Person where email_hash=#{emailHash}
+  </select>
+  
+  <delete id="cleanSessionData">
+    delete from session_data where updated &lt; now()- interval '12 hour' 
+  </select>
+  
+  <select id="getData">
+  	select data from session where id = #{id}
+  </select>
+  
 </mapper>

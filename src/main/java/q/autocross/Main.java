@@ -2,6 +2,10 @@ package q.autocross;
 
 import static spark.Spark.*;
 
+import java.util.UUID;
+
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
 import q.autocross.app.ApiPoints;
 import spark.Spark;
 
@@ -16,5 +20,6 @@ public class Main {
 		});
 		
 		get("/", (req,res) -> new ApiPoints().returnStatic("/ui/index.html"));
+
 	}
 }

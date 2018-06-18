@@ -3,12 +3,16 @@ package q.autocross.db;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.sql.Connection;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import com.google.gson.Gson;
+
+import q.autocross.engine.Data;
 import q.autocross.engine.Person;
+import q.autocross.engine.Session;
 
 public class DB {
 	private AutocrossMapper mapper;
@@ -37,6 +41,25 @@ public class DB {
 	
 	public Person getPeopleById(String id) {
 		return mapper.getPerson(id);
+	}
+	
+	public Person getPeopleByName(String firstName, String lastName) {
+		return mapper.getPersonByName(firstName, lastName, Session.Singleton.INSTANCE.get().getClubId());
+	}
+	
+	public Person getPeopleByEmail(String email) {
+		return mapper.getPersonByEmail(Data.hashEmail(email), Session.Singleton.INSTANCE.get().getClubId());
+	}
+	
+	public Data getData(String id) {
+		//mapper.cleanSessionData();
+		Gson gson = new Gson();
+		return gson.fromJson(mapper.getData(id), Data.class);
+	}
+	
+	public void insertData(String id, Data data) {
+		Gson gson = new Gson();
+		mapper.upsertData(id, gson.toJson(data));
 	}
 	
 }

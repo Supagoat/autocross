@@ -14,14 +14,16 @@ import javax.servlet.http.Part;
 import q.autocross.engine.Data;
 import spark.Request;
 import spark.Response;
+import spark.Session;
 
 public class ApiPoints {
 	public String upload(Request req, Response resp) {
-		req.session();
+		Session session = req.session();
+
 		req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
 		try {
 			Optional<String> fileName = getFileName(req.raw().getPart("uploadedfile"));
-			new Data().read(new ByteArrayInputStream(readUpload(req)));
+			 new Data().read(new ByteArrayInputStream(readUpload(req)));
 			return returnStatic("/ui/people/peopleDedupe.html");
 		} catch (Exception e) {
 			e.printStackTrace();
