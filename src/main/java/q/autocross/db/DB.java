@@ -4,18 +4,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
 
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import com.google.gson.Gson;
 
 import q.autocross.engine.Data;
+import q.autocross.engine.InputProcessor;
 import q.autocross.engine.Person;
 import q.autocross.engine.Session;
 
 public class DB {
 	private AutocrossMapper mapper;
+	private SqlSession session;
 	
 	public DB() {
 		connect();
@@ -27,7 +29,8 @@ public class DB {
 			String resource = "d:\\dev\\autocross\\dbConfig.xml";
 			Reader reader = new FileReader(new File(resource));
 			SqlSessionFactory  sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-			mapper = sqlSessionFactory.openSession().getMapper(AutocrossMapper.class);
+			session = sqlSessionFactory.openSession();
+			mapper = session.getMapper(AutocrossMapper.class);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -48,7 +51,7 @@ public class DB {
 	}
 	
 	public Person getPeopleByEmail(String email) {
-		return mapper.getPersonByEmail(Data.hashEmail(email), Session.Singleton.INSTANCE.get().getClubId());
+		return mapper.getPersonByEmail(InputProcessor.hashEmail(email), Session.Singleton.INSTANCE.get().getClubId());
 	}
 	
 	public Data getData(String id) {
@@ -58,8 +61,10 @@ public class DB {
 	}
 	
 	public void insertData(String id, Data data) {
+		mapper.deleteSessionData(id);
 		Gson gson = new Gson();
-		mapper.upsertData(id, gson.toJson(data));
+		mapper.insertSessionData(id, gson.toJson(data));
+		session.commit();
 	}
 	
 }

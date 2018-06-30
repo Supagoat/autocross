@@ -2,6 +2,7 @@ package q.autocross.db;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Results;
@@ -32,13 +33,15 @@ public interface AutocrossMapper {
 	@Delete("delete from session_data where updated &lt; now()- interval '12 hour'")
 	public void cleanSessionData();
 	
+	@Delete("delete from session_data where id = #{id}")
+	public void deleteSessionData(@Param("id") String id);
+	
 	@Select("select data from session where id = #{id}")
 	@Results(id = "data", value = {
 			@Result(property="data", column="data", javaType=String.class),
 	})
 	public String getData(String id);
 	
-	@Insert("insert into session_data (id, data) values #{id}, #{data} on conflict do update"
-			+ "set data = #{data}")
-	public void upsertData(String id, String data);
+	@Insert("insert into session_data (id, data) values (#{id}, #{data})")
+	public void insertSessionData(@Param("id") String id, @Param("data")String data);
 }

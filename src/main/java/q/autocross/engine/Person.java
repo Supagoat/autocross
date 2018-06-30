@@ -31,7 +31,7 @@ public class Person {
 	}
 	
 	public Person setUnhashedEmail(String email) {
-		setEmailHash(Data.hashEmail(email));
+		setEmailHash(InputProcessor.hashEmail(email));
 		return this;
 	}
 	public String getEmailHash() {

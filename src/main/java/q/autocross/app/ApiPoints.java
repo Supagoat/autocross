@@ -6,24 +6,37 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
+import q.autocross.db.DB;
 import q.autocross.engine.Data;
+import q.autocross.engine.InputProcessor;
+import q.autocross.engine.Person;
 import spark.Request;
 import spark.Response;
 import spark.Session;
 
 public class ApiPoints {
+	
+	private DB db;
+	
+	public ApiPoints() {
+		db = new DB();
+	}
+	
 	public String upload(Request req, Response resp) {
 		Session session = req.session();
 
 		req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
 		try {
 			Optional<String> fileName = getFileName(req.raw().getPart("uploadedfile"));
-			 new Data().read(new ByteArrayInputStream(readUpload(req)));
+			 List<Person> people = new InputProcessor().read(new ByteArrayInputStream(readUpload(req)));
+			 
+			 getDb().insertData(session.id(), new Data().setPeople(people));
 			return returnStatic("/ui/people/peopleDedupe.html");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,4 +83,15 @@ public class ApiPoints {
 			return "Error generating response";
 		}
 	}
+
+	protected DB getDb() {
+		return db;
+	}
+
+	protected ApiPoints setDb(DB db) {
+		this.db = db;
+		return this;
+	}
+	
+	
 }
