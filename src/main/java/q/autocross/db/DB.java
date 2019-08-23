@@ -26,7 +26,7 @@ public class DB {
 	protected DB connect() {
 		try {
 
-			String resource = "d:\\dev\\autocross\\dbConfig.xml";
+			String resource = "dbConfig.xml";
 			Reader reader = new FileReader(new File(resource));
 			SqlSessionFactory  sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 			session = sqlSessionFactory.openSession();

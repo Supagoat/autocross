@@ -37,11 +37,16 @@ public class ApiPoints {
 			 List<Person> people = new InputProcessor().read(new ByteArrayInputStream(readUpload(req)));
 			 
 			 getDb().insertData(session.id(), new Data().setPeople(people));
-			return returnStatic("/ui/people/peopleDedupe.html");
+			return returnStatic("/ui/peopleDedupe.html");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public Data getSessionData(Request req, Response resp) {
+		Session session = req.session();
+		return getDb().getData(session.id());
 	}
 
 	private Optional<String> getFileName(Part part) {

@@ -15,11 +15,11 @@ public class Main {
 		Spark.staticFiles.location("/public");
 		
 		path("/api", () -> {
-			get("/hello", (req, res) -> "Hello World");
+			get("/sessionData", (req, res) -> new ApiPoints().getSessionData(req, res));
 			post("/upload", (req, res) -> new ApiPoints().upload(req, res)); 
 		});
 		
-		get("/", (req,res) -> new ApiPoints().returnStatic("/ui/index.html"));
-
+		//get("/", (req,res) -> new ApiPoints().returnStatic("/ui/index.html"));
+		get("/test", (req,res) -> new ApiPoints().returnStatic("/ui/test.html"));
 	}
 }

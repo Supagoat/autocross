@@ -40,21 +40,8 @@ public class InputProcessor {
 
 	public List<Person> processSheet(Sheet sheet) {
 		Iterator<Row> rowIterator = sheet.rowIterator();
-		//DataFormatter dataFormatter = new DataFormatter();
 		Row row = rowIterator.next();
 		Map<Integer,String> colMap = mapColumns(row.cellIterator());
-		/*while (rowIterator.hasNext()) {
-			
-
-			Iterator<Cell> cellIterator = row.cellIterator();
-
-			while (cellIterator.hasNext()) {
-				Cell cell = cellIterator.next();
-				String cellValue = dataFormatter.formatCellValue(cell);
-				System.out.print(cellValue + "\t");
-			}
-			System.out.println();
-		}*/
 		return buildPersonGrid(rowIterator, colMap);
 	}
 	
@@ -102,7 +89,6 @@ public class InputProcessor {
 
 			cellNum++;
 		}
-		System.out.println(person.getFirstName());
 		return person;
 	}
 	
