@@ -23,6 +23,10 @@ public class Run implements Comparable<Run> {
 	
 	};
 	
+	public Run() {
+		setFinished(true);
+	}
+	
 	public static Run noRun() {
 		Run r = new Run();
 		r.setFinished(false);
@@ -85,5 +89,8 @@ public class Run implements Comparable<Run> {
 		return Double.compare(Double.valueOf(getComparableTime()), Double.valueOf(o.getComparableTime()));
 	}
 
-	
+	@Override
+	public String toString() {
+		return getPaxTime()+"+"+getPenalties()+" "+isFinished();
+	}
 }

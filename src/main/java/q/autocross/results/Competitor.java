@@ -19,10 +19,11 @@ public class Competitor implements Comparable<Competitor>{
 	
 	public Competitor() {
 		runs = new ArrayList<>();
+
 	}
 	
 	public Run getBestRun(Run.Session session) {
-		List<Run> sortedSession = getRuns().stream().filter(r -> r.getSession() == session).collect(Collectors.toList());
+		List<Run> sortedSession = getRuns().stream().filter(r -> r.getSession() == session && r.isFinished()).collect(Collectors.toList());
 		Collections.sort(sortedSession);
 		return sortedSession.size() == 0 ? Run.noRun() : sortedSession.get(0);
 	}
@@ -106,4 +107,9 @@ public class Competitor implements Comparable<Competitor>{
 		Competitor c = (Competitor)o;
 		return this.getBmwClass().equals(c.getBmwClass()) && this.getPax().equals(c.getPax()) && this.getNumber().equals(c.getNumber()) && this.getRuns().equals(c.getRuns());
 	} 
+	
+	@Override
+	public String toString() {
+		return getBmwClass()+" "+getPax()+" "+getNumber()+" "+getFirstName()+" "+getLastName();
+	}
 }

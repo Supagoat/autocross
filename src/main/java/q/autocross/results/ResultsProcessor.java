@@ -3,11 +3,13 @@ package q.autocross.results;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -32,17 +34,6 @@ public class ResultsProcessor {
 				processor.readTSV(new File(cmd.getOptionValue("p"))));
 	}
 
-	public void read(File in) throws Exception {
-		// Workbook workbook = WorkbookFactory.create(in);\
-		POIFSFileSystem fs = new POIFSFileSystem(in);
-		HSSFWorkbook wb = new HSSFWorkbook(fs.getRoot(), true);
-		HSSFSheet sheet = wb.getSheetAt(0);
-		for (Row row : sheet) {
-			for (Cell cell : row) {
-				// Do something here
-			}
-		}
-	}
 
 	public Map<String, Integer> buildHeaderMap(Row row) {
 		Map<String, Integer> header = new HashMap<String, Integer>();
@@ -61,34 +52,6 @@ public class ResultsProcessor {
 		return Pair.of(sheet, buildHeaderMap(sheet.getRow(0)));
 	}
 
-	// public Pair<CSVParser, Map<String, Integer>> readTSV(File file) throws
-	// Exception {
-	// Map<String, Integer> headerMap = new HashMap<>();
-	// CSVFormat format = CSVFormat.newFormat('\t').withQuote('"');
-	// CSVParser parser = CSVParser.parse(file, Charset.defaultCharset(),
-	// format);
-	// CSVRecord header = parser.getRecords().get(0);
-	// for (CSVRecord record : parser.getRecords()) {
-	// /// Oooh I don't need this since I can reference by header name with this
-	// thing
-	// paxes.put(record.get("Class").trim(),
-	// Double.parseDouble(record.get("PAX").trim()));
-	// }
-	// }
-
-	// public Pair<HSSFSheet, Map<String,Integer>> readRawReg(File file) throws
-	// Exception {
-	// //String carClass = "Class"; // This is either 1 letter for BMWs or multiple:
-	// Group then SCCA class like "GAS" or "LSTR"
-	// //"Number", "First Name", "Last Name", "Novice"
-	//
-	// for (Row row : sheet) {
-	// row.getCell(cellnum)
-	// for (Cell cell : row) {
-	// // Do something here
-	// }
-	// }
-	// }
 
 	public CSVParser readTSV(File file) {
 		try {
@@ -100,7 +63,6 @@ public class ResultsProcessor {
 	}
 
 	public void processResults(File file, CSVParser regSheet) throws Exception {
-		// csvReader.getParser().getSeparator()
 
 		List<CSVRecord> rawResults = readTSV(file).getRecords();
 		List<CSVRecord> regs = regSheet.getRecords();
@@ -112,8 +74,9 @@ public class ResultsProcessor {
 			carClasses.add(carClass);
 			CSVRecord matchingReg = getRow(regs, carNumber, carClass);
 			if (matchingReg != null) {
-				Competitor c = new Competitor().setBmwClass(carClass).setNumber(carNumber).setPax(rawResult.get("PAX"))
-						.setFirstName(rawResult.get("First Name").trim()).setLastName(rawResult.get("Last Name").trim());
+				Competitor c = new Competitor().setBmwClass(carClass).setNumber(carNumber)
+						.setPax(matchingReg.get("PAX")).setFirstName(rawResult.get("First Name").trim())
+						.setLastName(rawResult.get("Last Name").trim());
 				c.setRuns(readRuns(c, rawResult));
 
 				competitors.add(c);
@@ -122,6 +85,15 @@ public class ResultsProcessor {
 						.println("NO " + rawResult.get("First Name").trim() + " " + rawResult.get("Last Name").trim());
 			}
 
+		}
+
+		for (String carClass : carClasses) {
+			List<Competitor> classCompetitors = competitors.stream()
+					.filter(c -> c.getBmwClass().contentEquals(carClass)).collect(Collectors.toList());
+			Collections.sort(classCompetitors);
+			for(int i=0;i<classCompetitors.size();i++) {
+				System.out.println(i+" "+classCompetitors.get(i));
+			}
 		}
 
 		// Output:
@@ -136,7 +108,9 @@ public class ResultsProcessor {
 		List<Run> runs = new ArrayList<>();
 
 		for (Run.Session session : Run.Session.values()) {
-			for (int i = 1; i < 6; i++) {
+
+			int numRuns = countRuns(results, session);
+			for (int i = 1; i < numRuns + 1; i++) {
 				String rawTime = results.get("Run " + i + session.sessionResultAppend()).trim();
 				Double parsedTime = null;
 				try {
@@ -146,8 +120,8 @@ public class ResultsProcessor {
 				}
 				if (parsedTime != null) {
 					Run r = new Run().setRawTime(parsedTime).setSession(session);
-					r.setPaxTime(
-							c.getPax().isEmpty() ? r.getRawTime() : r.getRawTime() * Double.parseDouble(c.getPax()));
+					r.setPaxTime(c.getPax().isEmpty() ? r.getRawTime()
+							: r.getRawTime() * paxes.get(c.getPax().toUpperCase()));
 					try {
 						String penalties = results.get("Pen " + i + session.sessionResultAppend()).trim();
 						if (penalties.length() > 0) {
@@ -163,23 +137,18 @@ public class ResultsProcessor {
 		return runs;
 	}
 
-	/*
-	 * public void processResults(File file, Pair<HSSFSheet, Map<String, Integer>>
-	 * regSheet) throws Exception { // csvReader.getParser().getSeparator()
-	 * CSVFormat format = CSVFormat.newFormat('\t').withQuote('"'); CSVParser parser
-	 * = CSVParser.parse(file, Charset.defaultCharset(), format); for (CSVRecord
-	 * record : parser.getRecords()) { String carClass = record.get("Class").trim();
-	 * String carNumber = record.get("Number").trim(); String fName =
-	 * record.get("First Name").trim(); String lName =
-	 * record.get("Last Name").trim(); Row matchingReg = getRow(regSheet, carNumber,
-	 * carClass); if(matchingReg != null) {
-	 * System.out.println("YES "+fName+" "+lName); } else {
-	 * System.out.println("NO "+fName+" "+lName); } }
-	 * 
-	 * // Output: // best morning run # and best afternoon run # , average (post-pax
-	 * for non-bmws) // Place // Points: .5, 2,3,4,5,6,7,8,9, etc // FTD y/n ...
-	 * Maybe ? // Novice status }
-	 */
+	public int countRuns(CSVRecord results, Run.Session session) {
+		int runsThisSession = 1;
+		while (true) {
+			try {
+				results.get("Run " + (runsThisSession + 1) + session.sessionResultAppend());
+			} catch (IllegalArgumentException e) {
+				return runsThisSession;
+			}
+			runsThisSession++;
+		}
+	}
+
 	public Row getRow(Pair<HSSFSheet, Map<String, Integer>> sheet, String carNum, String carClass) {
 		for (Row row : sheet.getLeft()) {
 			if (hasCell(row, sheet.getRight(), "Class", carClass) && hasCell(row, sheet.getRight(), "Number", carNum)) {
@@ -217,15 +186,23 @@ public class ResultsProcessor {
 
 	public void readPaxes() throws Exception {
 		paxes = new HashMap<>();
-		// CSVFormat format =
-		// CSVFormat.newFormat('\t').withQuote('"').withFirstRecordAsHeader();
-		// CSVParser parser = CSVParser.parse(new File("conf" + File.separator +
-		// "pax.txt"), Charset.defaultCharset(),
-		// format);
 		CSVParser parser = readTSV(new File("conf" + File.separator + "pax.txt"));
 		for (CSVRecord record : parser.getRecords()) {
-			paxes.put(record.get("Class").trim(), Double.parseDouble(record.get("PAX").trim()));
+			paxes.put(record.get("Class").trim().toUpperCase(), Double.parseDouble(record.get("PAX").trim()));
 		}
 	}
 
+	
+// Don't use this yet...  Would if I needed to read excel files
+	public void read(File in) throws Exception {
+		// Workbook workbook = WorkbookFactory.create(in);\
+		POIFSFileSystem fs = new POIFSFileSystem(in);
+		HSSFWorkbook wb = new HSSFWorkbook(fs.getRoot(), true);
+		HSSFSheet sheet = wb.getSheetAt(0);
+		for (Row row : sheet) {
+			for (Cell cell : row) {
+				// Do something here
+			}
+		}
+	}
 }
