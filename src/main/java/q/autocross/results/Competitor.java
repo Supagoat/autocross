@@ -7,29 +7,31 @@ import java.util.stream.Collectors;
 
 import q.autocross.results.Run.Session;
 
-public class Competitor implements Comparable<Competitor>{
+public class Competitor implements Comparable<Competitor> {
 
 	private String firstName;
 	private String lastName;
 	private String number;
 	private String bmwClass;
 	private String pax;
-	
-	private List<Run> runs;
-	
-	public Competitor() {
-		runs = new ArrayList<>();
+	private String novice;
 
+	private List<Run> morningRuns;
+	private List<Run> afternoonRuns;
+
+	public Competitor() {
+		morningRuns = new ArrayList<>();
+		afternoonRuns = new ArrayList<>();
 	}
-	
+
 	public Run getBestRun(Run.Session session) {
-		List<Run> sortedSession = getRuns().stream().filter(r -> r.getSession() == session && r.isFinished()).collect(Collectors.toList());
+		List<Run> sortedSession = getRuns(session).stream().filter(r -> r.isFinished()).collect(Collectors.toList());
 		Collections.sort(sortedSession);
 		return sortedSession.size() == 0 ? Run.noRun() : sortedSession.get(0);
 	}
-	
+
 	public double getTimeForTheDay() {
-		return getBestRun(Session.Morning).getComparableTime()+getBestRun(Session.Afternoon).getComparableTime();
+		return getBestRun(Session.Morning).getComparableTime() + getBestRun(Session.Afternoon).getComparableTime();
 	}
 
 	@Override
@@ -37,8 +39,7 @@ public class Competitor implements Comparable<Competitor>{
 		Double totalTime = Double.valueOf(getTimeForTheDay());
 		return totalTime.compareTo(Double.valueOf(o.getTimeForTheDay()));
 	}
-	
-	
+
 	public String getFirstName() {
 		return firstName;
 	}
@@ -66,7 +67,6 @@ public class Competitor implements Comparable<Competitor>{
 		return this;
 	}
 
-
 	public String getBmwClass() {
 		return bmwClass;
 	}
@@ -85,31 +85,77 @@ public class Competitor implements Comparable<Competitor>{
 		return this;
 	}
 
-	public List<Run> getRuns() {
-		return runs;
+	public List<Run> getRuns(Run.Session type) {
+		switch (type) {
+		case Morning:
+			return getMorningRuns();
+		case Afternoon:
+			return getAfternoonRuns();
+		}
+		return null;
 	}
 
-	public Competitor setRuns(List<Run> runs) {
-		this.runs = runs;
+	public List<Run> getMorningRuns() {
+		return morningRuns;
+	}
+
+	public Competitor setMorningRuns(List<Run> morningRuns) {
+		this.morningRuns = morningRuns;
 		return this;
+	}
+
+	public List<Run> getAfternoonRuns() {
+		return afternoonRuns;
+	}
+
+	public Competitor setAfternoonRuns(List<Run> afternoonRuns) {
+		this.afternoonRuns = afternoonRuns;
+		return this;
+	}
+
+	public String getNovice() {
+		return novice;
+	}
+
+	public Competitor setNovice(String novice) {
+		this.novice = novice;
+		return this;
+	}
+
+	public String getAvg(boolean raw) {
+		if (!raw && (getPax() == null || getPax().isEmpty())) {
+			return "-";
+		}
+
+		Run bestMorning = getBestRun(Session.Morning);
+		Run bestAfternoon = getBestRun(Session.Afternoon);
+
+		if (bestMorning == null || !bestMorning.isFinished() || bestAfternoon == null || !bestAfternoon.isFinished()) {
+			return "-";
+		}
+		double totalTime = (raw? bestMorning.getRawTime() : bestMorning.getPaxTime())+(2*bestMorning.getPenalties());
+		totalTime += (raw? bestAfternoon.getRawTime() : bestAfternoon.getPaxTime())+(2*bestAfternoon.getPenalties());
+		return String.valueOf(totalTime / 2);
 	}
 
 	@Override
 	public int hashCode() {
-		return getBmwClass().hashCode()+getPax().hashCode()+getNumber().hashCode();
+		return getBmwClass().hashCode() + getPax().hashCode() + getNumber().hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		if(o instanceof Competitor == false) {
+		if (o instanceof Competitor == false) {
 			return false;
 		}
-		Competitor c = (Competitor)o;
-		return this.getBmwClass().equals(c.getBmwClass()) && this.getPax().equals(c.getPax()) && this.getNumber().equals(c.getNumber()) && this.getRuns().equals(c.getRuns());
-	} 
-	
+		Competitor c = (Competitor) o;
+		return this.getBmwClass().equals(c.getBmwClass()) && this.getPax().equals(c.getPax())
+				&& this.getNumber().equals(c.getNumber()) && this.getMorningRuns().equals(c.getMorningRuns())
+				&& this.getAfternoonRuns().equals(c.getAfternoonRuns());
+	}
+
 	@Override
 	public String toString() {
-		return getBmwClass()+" "+getPax()+" "+getNumber()+" "+getFirstName()+" "+getLastName();
+		return getBmwClass() + " " + getPax() + " " + getNumber() + " " + getFirstName() + " " + getLastName();
 	}
 }

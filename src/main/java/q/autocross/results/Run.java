@@ -2,7 +2,7 @@ package q.autocross.results;
 
 public class Run implements Comparable<Run> {
 	private int runNum;
-	private double rawTime;
+	private double rawTime = -1;
 	private double paxTime; 
 	private int penalties;
 	private boolean finished;

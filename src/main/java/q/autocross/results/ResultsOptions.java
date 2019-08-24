@@ -10,7 +10,7 @@ public class ResultsOptions extends Options {
 		addOption("e", true, "Path to emails excel file xls");
 		addOption("p", true, "Path to the Master Participants file tsv");
 		addOption("r", true, "Path to the results file tsv");
-
+		addOption("o", true, "Output directory");
 	}
 	
 }
