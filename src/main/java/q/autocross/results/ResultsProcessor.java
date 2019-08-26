@@ -98,7 +98,7 @@ public class ResultsProcessor {
 				competitors.add(c);
 			} else {
 				System.out
-						.println("NO " + rawResult.get("First Name").trim() + " " + rawResult.get("Last Name").trim());
+						.println("No matching reg found in "+carClass+" for " + rawResult.get("First Name").trim() + " " + rawResult.get("Last Name").trim());
 			}
 
 		}
@@ -107,9 +107,6 @@ public class ResultsProcessor {
 			List<Competitor> classCompetitors = competitors.stream()
 					.filter(c -> c.getBmwClass().contentEquals(carClass)).collect(Collectors.toList());
 			Collections.sort(classCompetitors);
-			for (int i = 0; i < classCompetitors.size(); i++) {
-				System.out.println(i + " " + classCompetitors.get(i));
-			}
 		}
 
 		// Output:
@@ -194,7 +191,7 @@ public class ResultsProcessor {
 			if (run.getRawTime() < 0) {
 				cell.setCellValue("-");
 			} else {
-				cell.setCellValue(run.isFinished() ? String.valueOf(run.getComparableTime()) : "dnf");
+				cell.setCellValue(run.isFinished() ? String.valueOf(Run.getTimeFormat().format(run.getComparableTime())) : "dnf");
 			}
 		}
 		return col;

@@ -1,5 +1,6 @@
 package q.autocross.results;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,7 +136,7 @@ public class Competitor implements Comparable<Competitor> {
 		}
 		double totalTime = (raw? bestMorning.getRawTime() : bestMorning.getPaxTime())+(2*bestMorning.getPenalties());
 		totalTime += (raw? bestAfternoon.getRawTime() : bestAfternoon.getPaxTime())+(2*bestAfternoon.getPenalties());
-		return String.valueOf(totalTime / 2);
+		return Run.getTimeFormat().format(totalTime / 2);
 	}
 
 	@Override

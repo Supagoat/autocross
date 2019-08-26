@@ -1,5 +1,7 @@
 package q.autocross.results;
 
+import java.text.DecimalFormat;
+
 public class Run implements Comparable<Run> {
 	private int runNum;
 	private double rawTime = -1;
@@ -7,6 +9,7 @@ public class Run implements Comparable<Run> {
 	private int penalties;
 	private boolean finished;
 	private Session session;
+	public static final DecimalFormat timeFormat = new DecimalFormat("0.000");
 	
 	public static final int FAKE_RUN_PENALITY_INDICATOR = 8675309;
 	
@@ -93,4 +96,10 @@ public class Run implements Comparable<Run> {
 	public String toString() {
 		return getPaxTime()+"+"+getPenalties()+" "+isFinished();
 	}
+
+	public static DecimalFormat getTimeFormat() {
+		return timeFormat;
+	}
+	
+	
 }
