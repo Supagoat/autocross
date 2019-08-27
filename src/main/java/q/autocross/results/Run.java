@@ -6,6 +6,7 @@ public class Run implements Comparable<Run> {
 	private int runNum;
 	private double rawTime = -1;
 	private double paxTime; 
+	private double paxPenalties = 0;
 	private int penalties;
 	private boolean finished;
 	private Session session;
@@ -41,7 +42,7 @@ public class Run implements Comparable<Run> {
 		if(!isFinished()) {
 			return 99999999;
 		}
-		return getPaxTime()+(2*getPenalties());
+		return getPaxTime()+(2*getPaxPenalties());
 	}
 	
 	public int getRunNum() {
@@ -87,6 +88,16 @@ public class Run implements Comparable<Run> {
 		this.session = session;
 		return this;
 	}
+	
+	public double getPaxPenalties() {
+		return paxPenalties;
+	}
+
+	public Run setPaxPenalties(double paxPenalties) {
+		this.paxPenalties = paxPenalties;
+		return this;
+	}
+
 	@Override
 	public int compareTo(Run o) {
 		return Double.compare(Double.valueOf(getComparableTime()), Double.valueOf(o.getComparableTime()));

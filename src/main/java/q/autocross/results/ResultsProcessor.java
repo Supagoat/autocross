@@ -249,6 +249,7 @@ public class ResultsProcessor {
 					String penalties = results.get("Pen " + i + session.sessionResultAppend()).trim();
 					if (penalties.length() > 0) {
 						r.setPenalties(Integer.parseInt(penalties));
+						r.setPaxPenalties(c.getPax().isEmpty() ? r.getPenalties() : r.getPenalties() *  paxes.get(c.getPax().toUpperCase()));
 					}
 				} catch (NumberFormatException e) {
 					r.setFinished(false);

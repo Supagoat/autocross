@@ -15,6 +15,7 @@ public class Competitor implements Comparable<Competitor> {
 	private String number;
 	private String bmwClass;
 	private String pax;
+	private double paxModifier;
 	private String novice;
 
 	private List<Run> morningRuns;
@@ -123,6 +124,15 @@ public class Competitor implements Comparable<Competitor> {
 		return this;
 	}
 
+	public double getPaxModifier() {
+		return paxModifier;
+	}
+
+	public Competitor setPaxModifier(double paxModifier) {
+		this.paxModifier = paxModifier;
+		return this;
+	}
+
 	public String getAvg(boolean raw) {
 		if (!raw && (getPax() == null || getPax().isEmpty())) {
 			return "-";
@@ -134,8 +144,9 @@ public class Competitor implements Comparable<Competitor> {
 		if (bestMorning == null || !bestMorning.isFinished() || bestAfternoon == null || !bestAfternoon.isFinished()) {
 			return "-";
 		}
-		double totalTime = (raw? bestMorning.getRawTime() : bestMorning.getPaxTime())+(2*bestMorning.getPenalties());
-		totalTime += (raw? bestAfternoon.getRawTime() : bestAfternoon.getPaxTime())+(2*bestAfternoon.getPenalties());
+		//TODO: This has gotten ugly looking, although it is correct.
+		double totalTime = (raw? bestMorning.getRawTime() : bestMorning.getPaxTime())+(2*(raw? bestMorning.getPenalties() : bestMorning.getPaxPenalties()));
+		totalTime += (raw? bestAfternoon.getRawTime() : bestAfternoon.getPaxTime())+(2*(raw? bestAfternoon.getPenalties() : bestAfternoon.getPaxPenalties()));
 		return Run.getTimeFormat().format(totalTime / 2);
 	}
 
