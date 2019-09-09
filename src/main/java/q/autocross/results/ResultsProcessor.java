@@ -92,7 +92,7 @@ public class ResultsProcessor {
 			if (matchingReg != null) {
 				Competitor c = new Competitor().setBmwClass(carClass).setNumber(carNumber)
 						.setPax(matchingReg.get("PAX")).setFirstName(rawResult.get("First Name").trim())
-						.setLastName(rawResult.get("Last Name").trim()).setNovice(matchingReg.get("Rookie"));
+						.setLastName(rawResult.get("Last Name").trim()).setNovice(matchingReg.get("Rookie")).setCarModel(matchingReg.get("Car Model"));
 				c.setMorningRuns(readRuns(c, Run.Session.Morning, rawResult));
 				c.setAfternoonRuns(readRuns(c, Run.Session.Afternoon, rawResult));
 				competitors.add(c);
@@ -118,7 +118,7 @@ public class ResultsProcessor {
 	}
 
 	private static final String[] PRE_RUN_COLS = new String[] { "CLASS", "PAX", "CAR", "PLACE", "FIRST", "LAST",
-			"NOVICE" };
+			"MODEL", "NOVICE" };
 	private static final String RUN_COL = "RUN ";
 	private static final String[] POST_RUN_COLS = new String[] { "AVG", "PAX Avg", "POINTS" };
 
@@ -160,6 +160,8 @@ public class ResultsProcessor {
 				cell.setCellValue(competitor.getFirstName());
 				cell = row.createCell(col++);
 				cell.setCellValue(competitor.getLastName());
+				cell = row.createCell(col++);
+				cell.setCellValue(competitor.getCarModel());
 				cell = row.createCell(col++);
 				cell.setCellValue(competitor.getNovice());
 				
@@ -243,8 +245,13 @@ public class ResultsProcessor {
 			}
 			if (parsedTime != null) {
 				Run r = new Run().setRawTime(parsedTime).setSession(session);
+				try {
 				r.setPaxTime(
 						c.getPax().isEmpty() ? r.getRawTime() : r.getRawTime() * paxes.get(c.getPax().toUpperCase()));
+				} catch(NullPointerException e) {
+					System.out.println("Failed to find pax on : "+c);
+					throw e;
+				}
 				try {
 					String penalties = results.get("Pen " + i + session.sessionResultAppend()).trim();
 					if (penalties.length() > 0) {

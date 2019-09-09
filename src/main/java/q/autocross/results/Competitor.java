@@ -17,6 +17,7 @@ public class Competitor implements Comparable<Competitor> {
 	private String pax;
 	private double paxModifier;
 	private String novice;
+	private String carModel;
 
 	private List<Run> morningRuns;
 	private List<Run> afternoonRuns;
@@ -121,6 +122,16 @@ public class Competitor implements Comparable<Competitor> {
 
 	public Competitor setNovice(String novice) {
 		this.novice = novice;
+		return this;
+	}
+	
+
+	public String getCarModel() {
+		return carModel;
+	}
+
+	public Competitor setCarModel(String carModel) {
+		this.carModel = carModel;
 		return this;
 	}
 
