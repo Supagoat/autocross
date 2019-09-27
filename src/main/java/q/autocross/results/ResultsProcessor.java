@@ -92,13 +92,14 @@ public class ResultsProcessor {
 			if (matchingReg != null) {
 				Competitor c = new Competitor().setBmwClass(carClass).setNumber(carNumber)
 						.setPax(matchingReg.get("PAX")).setFirstName(rawResult.get("First Name").trim())
-						.setLastName(rawResult.get("Last Name").trim()).setNovice(matchingReg.get("Rookie")).setCarModel(matchingReg.get("Car Model"));
+						.setLastName(rawResult.get("Last Name").trim()).setNovice(matchingReg.get("Rookie"))
+						.setCarModel(matchingReg.get("Car Model"));
 				c.setMorningRuns(readRuns(c, Run.Session.Morning, rawResult));
 				c.setAfternoonRuns(readRuns(c, Run.Session.Afternoon, rawResult));
 				competitors.add(c);
 			} else {
-				System.out
-						.println("No matching reg found in "+carClass+" for " + rawResult.get("First Name").trim() + " " + rawResult.get("Last Name").trim());
+				System.out.println("No matching reg found in " + carClass + " for " + rawResult.get("First Name").trim()
+						+ " " + rawResult.get("Last Name").trim());
 			}
 
 		}
@@ -108,24 +109,20 @@ public class ResultsProcessor {
 					.filter(c -> c.getBmwClass().contentEquals(carClass)).collect(Collectors.toList());
 			Collections.sort(classCompetitors);
 		}
-
-		// Output:
-		// best morning run # and best afternoon run # , average (post-pax for non-bmws)
-		// Place
-		// Points: .5, 2,3,4,5,6,7,8,9, etc
-		// FTD y/n ... Maybe ?
-		// Novice status
 	}
 
 	private static final String[] PRE_RUN_COLS = new String[] { "CLASS", "PAX", "CAR", "PLACE", "FIRST", "LAST",
 			"MODEL", "NOVICE" };
 	private static final String RUN_COL = "RUN ";
 	private static final String[] POST_RUN_COLS = new String[] { "AVG", "PAX Avg", "POINTS" };
+	private static final String[] YTD_COLS = new String[] { "CAR", "CLASS", "FIRST", "LAST", "PAX", "PLACE", "NOVICE",
+			"MODEL", "POINTS" };
 
 	public void outputResults(Set<String> carClasses, List<Competitor> allCompetitors, String outputDir)
 			throws Exception {
-		XSSFWorkbook wb = new XSSFWorkbook();
-		CellStyle cellcolorstyle = wb.createCellStyle();
+		XSSFWorkbook eventResultsWB = new XSSFWorkbook();
+		XSSFWorkbook ytdResultsWB = new XSSFWorkbook();
+		CellStyle cellcolorstyle = eventResultsWB.createCellStyle();
 		byte[] headerRgb = new byte[] { (byte) 112, (byte) 134, (byte) 156 };
 		XSSFCellStyle xssfHeaderStyle = null;
 		if (cellcolorstyle instanceof XSSFCellStyle) {
@@ -135,100 +132,141 @@ public class ResultsProcessor {
 			throw new IllegalStateException("How do we have an HSSF cell here?");
 		}
 
-		Sheet sheet = wb.createSheet("Event Results");
-		int rowNum = 0;
-
+		Sheet eventResultsSheet = eventResultsWB.createSheet("Event Results");
+		Sheet ytdResultsSheet = ytdResultsWB.createSheet("YTD Results");
+		int eventResultRowNum = 0;
+		int ytdRowNum = 0;
+		Row ytdRow = ytdResultsSheet.createRow(ytdRowNum++);
+		outputHeaders(ytdRow, YTD_COLS, new String[] {}, false, xssfHeaderStyle);
 		for (String carClass : carClasses) {
-			Row row = sheet.createRow(rowNum++);
-			outputHeaders(row, xssfHeaderStyle);
+
+			Row eventResultRow = eventResultsSheet.createRow(eventResultRowNum++);
+
+			outputHeaders(eventResultRow, PRE_RUN_COLS, POST_RUN_COLS, true, xssfHeaderStyle);
+			
 			List<Competitor> classCompetitors = allCompetitors.stream()
 					.filter(c -> c.getBmwClass().contentEquals(carClass)).collect(Collectors.toList());
 			Collections.sort(classCompetitors);
 			int pos = 1;
 			for (Competitor competitor : classCompetitors) {
-				row = sheet.createRow(rowNum++);
+				ytdRow = ytdResultsSheet.createRow(ytdRowNum++);
+				eventResultRow = eventResultsSheet.createRow(eventResultRowNum++);
 				int col = 0;
-				Cell cell = row.createCell(col++);
-				cell.setCellValue(competitor.getBmwClass());
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getPax());
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getNumber());
-				cell = row.createCell(col++);
-				cell.setCellValue(pos);
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getFirstName());
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getLastName());
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getCarModel());
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getNovice());
-				
-				col = setRunCells(competitor.getMorningRuns(), row, col);
-				col = setRunCells(competitor.getAfternoonRuns(), row, col);
-				
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getAvg(true));
-				
-				cell = row.createCell(col++);
-				cell.setCellValue(competitor.getAvg(false));
-				
-				cell = row.createCell(col++);
-				cell.setCellValue(pos == 1 ? 0.5 : pos);
+
+				Cell ytdResultCell = ytdRow.createCell(col);
+				Cell eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(competitor.getNumber());
+				eventResultCell.setCellValue(competitor.getBmwClass());
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(competitor.getBmwClass());
+				eventResultCell.setCellValue(competitor.getPax());
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(competitor.getFirstName());
+				eventResultCell.setCellValue(competitor.getNumber());
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(competitor.getLastName());
+				eventResultCell.setCellValue(pos);
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(competitor.getPax());
+				eventResultCell.setCellValue(competitor.getFirstName());
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(pos);
+				eventResultCell.setCellValue(competitor.getLastName());
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(competitor.getNovice());
+				eventResultCell.setCellValue(competitor.getCarModel());
+
+				ytdResultCell = ytdRow.createCell(col);
+				eventResultCell = eventResultRow.createCell(col++);
+				ytdResultCell.setCellValue(""); // Model has a column but my example shows it always empty
+				eventResultCell.setCellValue(competitor.getNovice());
+
+				ytdResultCell = ytdRow.createCell(col);
+				ytdResultCell.setCellValue(pos == 1 ? 0.5 : pos);
+
+				col = setRunCells(competitor.getMorningRuns(), eventResultRow, col);
+				col = setRunCells(competitor.getAfternoonRuns(), eventResultRow, col);
+
+				eventResultCell = eventResultRow.createCell(col++);
+				eventResultCell.setCellValue(competitor.getAvg(true));
+
+				eventResultCell = eventResultRow.createCell(col++);
+				eventResultCell.setCellValue(competitor.getAvg(false));
+
+				eventResultCell = eventResultRow.createCell(col++);
+				eventResultCell.setCellValue(pos == 1 ? 0.5 : pos);
 
 				pos++;
 			}
 		}
 
 		try (OutputStream fileOut = new FileOutputStream(outputDir + File.separator + "finalResults.xlsx")) {
-			wb.write(fileOut);
+			eventResultsWB.write(fileOut);
 		}
-		wb.close();
+		try (OutputStream fileOut = new FileOutputStream(outputDir + File.separator + "ytdInputResults.xlsx")) {
+			ytdResultsWB.write(fileOut);
+		}
+		eventResultsWB.close();
+		ytdResultsWB.close();
 	}
-	
+
 	public int setRunCells(List<Run> runs, Row row, int col) {
 		for (Run run : runs) {
 			Cell cell = row.createCell(col++);
 			if (run.getRawTime() < 0) {
 				cell.setCellValue("-");
 			} else {
-				cell.setCellValue(run.isFinished() ? String.valueOf(Run.getTimeFormat().format(run.getComparableTime())) : "dnf");
+				cell.setCellValue(
+						run.isFinished() ? String.valueOf(Run.getTimeFormat().format(run.getConedRawTime())) : "dnf");
 			}
 		}
 		return col;
 	}
 
-	public void outputHeaders(Row row, XSSFCellStyle xssfHeaderStyle) {
+	public void outputHeaders(Row row, String[] preHeaders, String[] postHeaders, boolean runHeaders, XSSFCellStyle xssfHeaderStyle) {
 		int colCountBefore = 0;
-		int colCountAfter = PRE_RUN_COLS.length;
+		int colCountAfter = preHeaders.length;
 		for (int c = colCountBefore; c < colCountAfter; c++) {
 			Cell cell = row.createCell(c);
 			cell.setCellStyle(xssfHeaderStyle);
-			cell.setCellValue(PRE_RUN_COLS[c - colCountBefore]);
-		}
-		colCountBefore = colCountAfter;
-		colCountAfter = colCountBefore + getRunCounts().get(Run.Session.Morning);
-		for (int c = colCountBefore; c < colCountAfter; c++) {
-			Cell cell = row.createCell(c);
-			cell.setCellStyle(xssfHeaderStyle);
-			cell.setCellValue("RUN " + (c - colCountBefore + 1));
+			cell.setCellValue(preHeaders[c - colCountBefore]);
 		}
 
-		colCountBefore = colCountAfter;
-		colCountAfter = colCountBefore + getRunCounts().get(Run.Session.Afternoon);
-		for (int c = colCountBefore; c < colCountAfter; c++) {
-			Cell cell = row.createCell(c);
-			cell.setCellStyle(xssfHeaderStyle);
-			cell.setCellValue("RUN " + (c - colCountBefore + 1));
-		}
+		if (runHeaders) {
+			colCountBefore = colCountAfter;
+			colCountAfter = colCountBefore + getRunCounts().get(Run.Session.Morning);
+			for (int c = colCountBefore; c < colCountAfter; c++) {
+				Cell cell = row.createCell(c);
+				cell.setCellStyle(xssfHeaderStyle);
+				cell.setCellValue("RUN " + (c - colCountBefore + 1));
+			}
 
+			colCountBefore = colCountAfter;
+			colCountAfter = colCountBefore + getRunCounts().get(Run.Session.Afternoon);
+			for (int c = colCountBefore; c < colCountAfter; c++) {
+				Cell cell = row.createCell(c);
+				cell.setCellStyle(xssfHeaderStyle);
+				cell.setCellValue("RUN " + (c - colCountBefore + 1));
+			}
+		}
 		colCountBefore = colCountAfter;
-		colCountAfter = colCountBefore + POST_RUN_COLS.length;
+		colCountAfter = colCountBefore + postHeaders.length;
 		for (int c = colCountBefore; c < colCountAfter; c++) {
 			Cell cell = row.createCell(c);
 			cell.setCellStyle(xssfHeaderStyle);
-			cell.setCellValue(POST_RUN_COLS[c - colCountBefore]);
+			cell.setCellValue(postHeaders[c - colCountBefore]);
 		}
 	}
 
@@ -246,17 +284,18 @@ public class ResultsProcessor {
 			if (parsedTime != null) {
 				Run r = new Run().setRawTime(parsedTime).setSession(session);
 				try {
-				r.setPaxTime(
-						c.getPax().isEmpty() ? r.getRawTime() : r.getRawTime() * paxes.get(c.getPax().toUpperCase()));
-				} catch(NullPointerException e) {
-					System.out.println("Failed to find pax on : "+c);
+					r.setPaxTime(c.getPax().isEmpty() ? r.getRawTime()
+							: r.getRawTime() * paxes.get(c.getPax().toUpperCase()));
+				} catch (NullPointerException e) {
+					System.out.println("Failed to find pax on : " + c);
 					throw e;
 				}
 				try {
 					String penalties = results.get("Pen " + i + session.sessionResultAppend()).trim();
 					if (penalties.length() > 0) {
 						r.setPenalties(Integer.parseInt(penalties));
-						r.setPaxPenalties(c.getPax().isEmpty() ? r.getPenalties() : r.getPenalties() *  paxes.get(c.getPax().toUpperCase()));
+						r.setPaxPenalties(c.getPax().isEmpty() ? r.getPenalties()
+								: r.getPenalties() * paxes.get(c.getPax().toUpperCase()));
 					}
 				} catch (NumberFormatException e) {
 					r.setFinished(false);

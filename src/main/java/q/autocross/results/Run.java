@@ -38,7 +38,14 @@ public class Run implements Comparable<Run> {
 		return r;
 	}
 	
-	public double getComparableTime() {
+	public double getConedRawTime() {
+		if(!isFinished()) {
+			return 99999999;
+		}
+		return getRawTime()+(2*getPenalties());
+	}
+	
+	public double getConedPaxedTime() {
 		if(!isFinished()) {
 			return 99999999;
 		}
@@ -100,7 +107,7 @@ public class Run implements Comparable<Run> {
 
 	@Override
 	public int compareTo(Run o) {
-		return Double.compare(Double.valueOf(getComparableTime()), Double.valueOf(o.getComparableTime()));
+		return Double.compare(Double.valueOf(getConedPaxedTime()), Double.valueOf(o.getConedPaxedTime()));
 	}
 
 	@Override

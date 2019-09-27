@@ -34,7 +34,7 @@ public class Competitor implements Comparable<Competitor> {
 	}
 
 	public double getTimeForTheDay() {
-		return getBestRun(Session.Morning).getComparableTime() + getBestRun(Session.Afternoon).getComparableTime();
+		return getBestRun(Session.Morning).getConedPaxedTime() + getBestRun(Session.Afternoon).getConedPaxedTime();
 	}
 
 	@Override
